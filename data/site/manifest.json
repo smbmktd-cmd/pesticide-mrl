@@ -1,0 +1,36 @@
+{
+  "fetched_at": "2026-11-26T09:40:00+08:00",
+  "ok": false,
+  "stale": true,
+  "error": "SSLError: HTTPSConnectionPool(host='consumer.fda.gov.tw', port=443): Max retries exceeded with url: /Law/PesticideList.aspx?nodeID=520&tk=1 (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1011)')))",
+  "source": "https://consumer.fda.gov.tw/Law/PesticideList.aspx?nodeID=520",
+  "method": "匯出Excel postback __EVENTTARGET=ctl00$content$LinkButton1",
+  "note": "由可連上 consumer.fda.gov.tw 的機器於 2026-11-26 09:35–09:40（台北）抓取。附表五取自同站 ODT GetFile.ashx?type=gfile&id=14380。",
+  "tables": {
+    "附表一": {
+      "rows": 8274,
+      "tk": "1",
+      "method": "excel-postback"
+    },
+    "附表二": {
+      "rows": 1,
+      "tk": "7",
+      "method": "excel-postback"
+    },
+    "附表三": {
+      "rows": 44,
+      "tk": "2",
+      "method": "excel-postback"
+    },
+    "附表四": {
+      "rows": 65,
+      "tk": "3",
+      "method": "excel-postback"
+    },
+    "附表五": {
+      "rows": 22,
+      "method": "odt",
+      "file_id": 14380
+    }
+  }
+}

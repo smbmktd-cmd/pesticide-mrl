@@ -1,0 +1,62 @@
+name: 每日更新農藥殘留資料
+
+on:
+  schedule:
+    # 06:00 Asia/Taipei
+    - cron: "0 22 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pesticide-mrl-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 安裝 PDF 文字工具與測試套件
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+          python -m pip install -r requirements.txt
+      - name: 下載、比對、寫入快照
+        run: python pipeline/sync.py --trigger "${{ github.event_name }}"
+      - name: 測試查詢規則
+        run: |
+          python -m pytest pipeline/tests -q
+          node pipeline/tests/lookup.test.mjs
+      - name: 提交異動
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data site/data
+          if git diff --staged --quiet; then
+            echo "沒有需要提交的變更"
+          else
+            git commit -m "data: 同步農藥殘留容許量（$(TZ=Asia/Taipei date +%F)）"
+            git push
+          fi
+      - name: 設定 Pages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+      - name: 發布 Pages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: 部署
+        if: github.ref == 'refs/heads/main'
+        id: deployment
+        uses: actions/deploy-pages@v4

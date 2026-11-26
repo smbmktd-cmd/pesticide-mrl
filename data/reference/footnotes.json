@@ -1,0 +1,34 @@
+[
+  {
+    "id": "註一",
+    "text": "二硫代胺基甲酸鹽類之容許量以 CS2計，其適用於二硫代胺基甲酸鹽類農藥之殘留總量，包括：1. 使用 ziram (益穗單劑成分之ㄧ)、免得爛 (metiram)、鎳乃浦(sankel)殘留之dimethyldithiocarbamates。2. 使用鋅錳乃浦(mancozeb) 、錳乃浦(maneb) 、甲基鋅乃浦(propineb) 、鐵鋅錳乃浦及 cufraneb (銅合浦單劑)殘留之 ethylenebis(dithiocarbamate)s。3. 使用益地安 (ETM)、得恩地(thiram)及富爾邦(Ferbam)。"
+  },
+  {
+    "id": "註二",
+    "text": "貝芬替之容許含量適用於免賴得、甲基多保淨產生代謝物之貝芬替殘留、或直接使用貝芬替之殘留。"
+  },
+  {
+    "id": "註三",
+    "text": "Iminoctadine 之容許量適用於 iminoctadine、iminoctadine triacetate 或 iminoctadinetris(albesilate)之殘留。"
+  },
+  {
+    "id": "註四",
+    "text": "農藥相關異構物之殘留以總量計算，包括：1. 賽滅寧(cypermethrin)之容許量，適用於賽滅寧及亞滅寧(alphacypermethrin)之殘留總量。2. 賽扶寧(cyfluthrin)之容許量，適用於賽扶寧及貝他賽扶寧(beta-cyfluthrin)之殘留總量。3. 芬化利(fenvalerate)之容許量，適用於芬化利及益化利(esfenvalerate)之殘留總量。4. 滅達樂(metalaxyl)之容許量，適用於滅達樂及右滅達樂(metalaxyl-M)之殘留總量。5. 莫多草(metolachlor)之容許量，適用於左旋及右旋莫多草(S-enantiomer and Renantiomer of metolachlor)之殘留總量。"
+  },
+  {
+    "id": "註五",
+    "text": "1. 本表中加註「*」不代表可使用農藥之作物範圍，其係依公告檢驗方法之定量極限訂定，除該農藥已訂定在特定作物之殘留容許量者外，其餘作物應符合本項規定，適用範圍包括相同檢驗方法定量極限者，例如乾燥香辛植物及其他草木本植物適用於其他(茶類)*之規定，如有修正檢驗方法，依最新公告者為準。 2. 自中華民國一百十二年一月一日起，「其他(蔬果類)*」對應公告檢驗方法檢體類別 I 類、「其他(穀類)*」 對應公告檢驗方法檢體類別 II 類、「其他(茶類)*」 對應公告檢驗方法檢體類別 III 類。"
+  },
+  {
+    "id": "註六",
+    "text": "大滅松(Dimethoate)之容許量，適用於大滅松及歐滅松(Omethoate)之殘留總量。歐滅松之殘留，應同時符合歐滅松之容許量。"
+  },
+  {
+    "id": "註七",
+    "text": "磷化氫(phosphine)之容許量適用於好達勝(aluminium phosphide)、磷化鎂(magnesium phosphide)、磷化鋅(zinc phosphide)之殘留，或直接使用磷化氫(phosphine)之殘留。"
+  },
+  {
+    "id": "註八",
+    "text": "自中華民國一百十三年四月一日起，本表所列特定作物之容許量經發布刪除，自發布施行日起算之流通緩衝期間，殘留量符合刪除前之容許量者，可繼續製造、加工、調配、貯存、販賣、輸入、輸出、作為贈品或公開陳列。各類作物之流通緩衝期如下:生鮮食用花卉三個月；蔬果類、香辛植物及草木本植物(含乾燥食用花卉)一年；乾豆類、咖啡豆、可可豆二年；米類、雜糧類、茶類三年。"
+  }
+]
