@@ -31,6 +31,19 @@ SOURCE_URLS = {
     "消費者專區": "https://consumer.fda.gov.tw/Law/PesticideList.aspx?nodeID=520&tk=1",
 }
 
+# Shown on the site. 附表一至四的查詢值來自消費者專區；這些 CSV 網址只供交叉比對。
+DISPLAY_SOURCES = {
+    **{key: value for key, value in SOURCE_URLS.items() if key not in {"附表一", "附表二", "附表三", "附表四"}},
+    "附表一": "https://consumer.fda.gov.tw/Law/PesticideList.aspx?nodeID=520&tk=1",
+    "附表二": "https://consumer.fda.gov.tw/Law/PesticideList.aspx?nodeID=520&tk=7",
+    "附表三": "https://consumer.fda.gov.tw/Law/PesticideList.aspx?nodeID=520&tk=2",
+    "附表四": "https://consumer.fda.gov.tw/Law/PesticideList.aspx?nodeID=520&tk=3",
+    "開放資料附表一": SOURCE_URLS["附表一"],
+    "開放資料附表二": SOURCE_URLS["附表二"],
+    "開放資料附表三": SOURCE_URLS["附表三"],
+    "開放資料附表四": SOURCE_URLS["附表四"],
+}
+
 
 def read_csv(path: Path) -> list[dict]:
     with path.open(encoding="utf-8-sig", newline="") as handle:
@@ -70,6 +83,7 @@ def build_database(
     repair_map: dict | None = None,
     footnotes: list[dict] | None = None,
     meta_extra: dict | None = None,
+    site_tables: dict | None = None,
 ) -> dict:
     warnings: list[str] = []
     paths = {name: raw_dir / filename for name, filename in ANNEX_FILES.items()}
@@ -77,11 +91,17 @@ def build_database(
         if not path.exists():
             raise FileNotFoundError(f"缺少{name}：{path}")
     hashes = {name: file_sha256(path) for name, path in paths.items()}
-    annex1 = read_csv(paths["附表一"])
-    annex2 = read_csv(paths["附表二"])
-    annex3 = read_csv(paths["附表三"])
-    annex4 = read_csv(paths["附表四"])
-    annex5 = read_csv(paths["附表五"])
+    csv_tables = {name: read_csv(path) for name, path in paths.items()}
+    site_tables = site_tables or {}
+    if site_tables:
+        warnings.append("附表一至附表四採用消費者專區；開放資料 CSV 只作交叉比對。")
+    else:
+        warnings.append("沒有消費者專區快照，附表一至附表四暫用開放資料。正式同步不會在連線失敗時改用 CSV。")
+    annex1 = site_tables.get("附表一") or csv_tables["附表一"]
+    annex2 = site_tables.get("附表二") or csv_tables["附表二"]
+    annex3 = site_tables.get("附表三") or csv_tables["附表三"]
+    annex4 = site_tables.get("附表四") or csv_tables["附表四"]
+    annex5 = csv_tables["附表五"]
 
     categories = {(row.get("類別") or "").strip() for row in annex5}
     builder = CropBuilder()
@@ -321,7 +341,7 @@ def build_database(
     notes = footnotes if footnotes is not None else parse_footnotes(None)
     pest_list = sorted(pesticides.values(), key=lambda item: (item.get("en") or item.get("zh") or "").lower())
     meta = {
-        "sources": SOURCE_URLS,
+        "sources": DISPLAY_SOURCES if site_tables else SOURCE_URLS,
         "hashes": hashes,
         "counts": {
             "附表一": len(annex1),

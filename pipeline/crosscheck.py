@@ -84,7 +84,14 @@ def parse_consumer_counts(html: str) -> dict:
     return {"counts": found, "excerpt": text[:500]}
 
 
-def crosscheck(*, annex_counts: dict, law_html: str | None, consumer_html: str | None, errors: list[str]) -> dict:
+def crosscheck(
+    *,
+    annex_counts: dict,
+    law_html: str | None,
+    consumer_html: str | None,
+    errors: list[str],
+    include_consumer: bool = True,
+) -> dict:
     report = {"law_amended_on": None, "annex1_pdf": None, "consumer": None, "mismatches": []}
     if law_html:
         parsed = parse_law_page(law_html)
@@ -94,6 +101,8 @@ def crosscheck(*, annex_counts: dict, law_html: str | None, consumer_html: str |
             report["mismatches"].append("全國法規資料庫頁面未解析到修正日期")
     else:
         report["mismatches"].append("未能下載全國法規資料庫條文，法規修正日缺漏")
+    if not include_consumer:
+        return report
     if consumer_html:
         parsed_consumer = parse_consumer_counts(consumer_html)
         report["consumer"] = parsed_consumer["counts"]

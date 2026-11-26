@@ -33,19 +33,25 @@ export function renderBanner(meta) {
   const banner = document.querySelector("#banner");
   if (!banner || !meta) return;
   const counts = meta.counts || {};
+  const source = meta.site_stale ? "消費者專區（沿用上次成功下載）" : meta.primary_source === "consumer" ? "消費者專區" : "開放資料";
   banner.innerHTML = `<div class="wrap">
     <span>資料時間 <strong>${esc(formatTaipei(meta.synced_at))}</strong></span>
     <span>法規修正 <strong>${esc(meta.law_amended_on || "未能取得")}</strong></span>
     <span>附表一 ${esc(counts["附表一"] ?? "—")} 列</span>
     <span>附表四禁用 ${esc(counts["附表四"] ?? "—")}</span>
     <span>附表五 ${esc(counts["附表五類別"] ?? "—")} 類</span>
+    <span>容許量來源 <strong>${esc(source)}</strong></span>
   </div>`;
   const host = document.querySelector("#alerts");
   if (!host) return;
   const mismatches = meta.crosscheck_mismatches || [];
   const warnings = (meta.warnings || []).filter((item) => !mismatches.includes(item));
+  const stale = meta.site_stale
+    ? `<div class="alert"><strong>消費者專區本次無法連線</strong><p>容許量與禁用名單沿用 ${esc(formatTaipei(meta.site_fetched_at))} 的成功下載，沒有改用開放資料 CSV。</p></div>`
+    : "";
   host.innerHTML = `
-    ${mismatches.length ? `<div class="alert"><strong>交叉比對不一致，未隱藏</strong><ul>${mismatches.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>` : ""}
+    ${stale}
+    ${mismatches.length ? `<div class="alert"><strong>與開放資料的差異，未隱藏。查詢採用消費者專區。</strong><ul>${mismatches.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>` : ""}
     ${warnings.length ? `<details class="quality" open><summary>資料清理與下載備註（${warnings.length}）</summary><ul>${warnings.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></details>` : ""}
   `;
 }

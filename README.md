@@ -26,31 +26,33 @@
 
 ## 資料來源
 
-只使用主管機關第一手資料。
+查詢用的附表一至附表四以[食品藥物消費者專區](https://consumer.fda.gov.tw/Law/PesticideList.aspx?nodeID=520&tk=1)為準（匯出 Excel，失敗才改逐頁 `p=`）。開放資料 CSV 只拿來交叉比對，差異寫在頁首和更新歷程，不會蓋過專區的數值。附表五作物分類仍用開放資料與法規頁上的最新版。
 
-| 資料 | 網址 |
-| --- | --- |
-| 附表一 容許量 | https://data.fda.gov.tw/data/opendata/export/13/csv |
-| 附表二 外源性 | https://data.fda.gov.tw/data/opendata/export/173/csv |
-| 附表三 免訂容許量 | https://data.fda.gov.tw/data/opendata/export/14/csv |
-| 附表四 禁用 | https://data.fda.gov.tw/data/opendata/export/15/csv |
-| 附表五 作物分類 | https://data.fda.gov.tw/data/opendata/export/16/csv |
-| 法規全文與修正日 | https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0040083 |
-| 筆數交叉比對 | https://consumer.fda.gov.tw/Law/PesticideList.aspx?nodeID=520&tk=1 |
+| 資料 | 查詢採用 | 交叉比對 |
+| --- | --- | --- |
+| 附表一 容許量 | 消費者專區 `tk=1` | https://data.fda.gov.tw/data/opendata/export/13/csv |
+| 附表二 外源性 | 消費者專區 `tk=7` | https://data.fda.gov.tw/data/opendata/export/173/csv |
+| 附表三 免訂 | 消費者專區 `tk=2` | https://data.fda.gov.tw/data/opendata/export/14/csv |
+| 附表四 禁用 | 消費者專區 `tk=3` | https://data.fda.gov.tw/data/opendata/export/15/csv |
+| 附表五 作物分類 | https://data.fda.gov.tw/data/opendata/export/16/csv | 法規附表五 |
+| 法規修正日 | https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0040083 | |
 
-開放資料的缺字（例如殺蟎劑變成 `殺?劑`）會盡量用法規附表一 PDF 對回，原始字串仍保留。普通名稱空白、重複列（可尼丁 + 竹筍）與交叉比對不一致，都寫在頁首，不隱藏。`0.01*` 的星號代表註五定量極限，數值與星號分開保存。
+連線會換幾種 TLS／HTTP 設定重試。專區這次抓不到時，沿用上一份成功的專區快照，**不會改用 CSV 的數值**，頁首會標明資料是沿用的。
 
-附表五和容許量表一樣，每天比對。作物被改掛到別的類別時，歷程類型是「分類變更」。
+開放資料若有缺字（例如殺蟎劑變成 `殺?劑`），而專區頁本身是完整字，就用專區的字。仍缺的才用法規 PDF 對回。原始字串保留。`0.01*` 的星號代表註五定量極限。
+
+附表五每天和容許量表一起比對。作物被改掛到別的類別時，歷程類型是「分類變更」。
 
 ## 每天怎麼更新
 
 `.github/workflows/sync.yml` 以 `0 22 * * *`（UTC）排程，也就是台北時間 06:00，並可手動執行。流程會：
 
-1. 下載五張 CSV，計算檔案雜湊。
-2. 讀法規頁的修正日，並用附表一 PDF 修復缺字、擷取表末的註。
-3. 和上一份快照做列級差異。容許量的鍵是正規化後的國際普通名稱 + 原始作物類別；附表五的鍵是類別 + 作物。
-4. 有差異才追加到 `data/history.jsonl`（新增、刪除、限值變更、備註變更、分類變更），每次執行都追加 `data/sync-runs.jsonl`。
-5. 寫進 `site/data/`，提交回倉庫，並在 `main` 上發布 GitHub Pages。
+1. 下載消費者專區附表一至附表四（先匯出 Excel，否則逐頁）。連不上就停用上次成功的專區快照，不改採 CSV。
+2. 下載五張開放資料 CSV，只用來交叉比對。少列、多列、限值不同都記成警告。
+3. 讀法規頁的修正日。附表五仍以開放資料這份分類表為準。
+4. 和上一份查詢快照做列級差異。容許量的鍵是正規化後的國際普通名稱 + 原始作物類別；附表五的鍵是類別 + 作物。
+5. 有差異才追加到 `data/history.jsonl`（新增、刪除、限值變更、備註變更、分類變更、開放資料差異），每次執行都追加 `data/sync-runs.jsonl`。
+6. 寫進 `site/data/`，提交回倉庫，並在 `main` 上發布 GitHub Pages。
 
 用 `GITHUB_TOKEN` 推上 `main` 時，不會再觸發另一條 Pages 工作流程，所以同步工作流程自己會部署一次。
 
