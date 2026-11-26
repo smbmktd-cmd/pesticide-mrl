@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>批次報告 · 農藥殘留容許量查詢</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="banner" class="banner"></div>
+  <header class="top">
+    <div class="wrap top-row">
+      <div>
+        <p class="eyebrow">同一原料 · 多項農殘</p>
+        <h1>批次對照篩檢報告</h1>
+        <p class="lede">先選定一種作物，再貼上或上傳名稱與檢出量。適合 MOHWP0055.05 這種一次很多項的報告。</p>
+      </div>
+      <nav>
+        <a href="index.html">單筆查詢</a>
+        <a href="batch.html" aria-current="page">批次報告</a>
+        <a href="history.html">更新歷程</a>
+        <a href="about.html">說明</a>
+      </nav>
+    </div>
+  </header>
+  <div class="wrap" id="alerts"></div>
+  <main class="wrap">
+    <form id="batch" class="panel">
+      <div class="grid">
+        <div class="field">
+          <label for="crop">原料名稱</label>
+          <input id="crop" type="text" autocomplete="off" placeholder="先選一個作物" required>
+          <div id="crop-menu" class="menu" hidden></div>
+        </div>
+        <div>
+          <label>市售型態</label>
+          <div class="modes">
+            <label><input type="radio" name="matrix" value="fresh" checked>新鮮</label>
+            <label><input type="radio" name="matrix" value="dried">乾燥</label>
+          </div>
+        </div>
+        <div>
+          <label for="file" class="ghost file-btn">選擇 CSV 檔</label>
+          <input id="file" type="file" accept=".csv,.txt,text/csv,text/plain" hidden>
+          <span id="filename" class="hint">尚未選擇檔案；沒有檔案時使用下方貼上的內容</span>
+        </div>
+      </div>
+      <label for="paste">或直接貼上 <span class="hint">農殘名稱,檢出量。可含標題列。</span></label>
+      <textarea id="paste" placeholder="農殘名稱,檢出量&#10;貝芬替,0.4&#10;免賴得,0.2&#10;滴滴涕,0.01"></textarea>
+      <div class="actions">
+        <button class="primary" type="submit">產生對照表</button>
+        <button class="ghost" id="export" type="button">匯出 CSV</button>
+        <span id="summary" class="hint"></span>
+      </div>
+    </form>
+    <div class="panel table-wrap" style="margin-top:16px">
+      <table>
+        <thead>
+          <tr><th>輸入名稱</th><th>中文</th><th>英文</th><th>檢出</th><th>容許量</th><th>判定</th><th>適用依據</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </main>
+  <footer>
+    <div class="wrap"><p>本站是對照工具。正式判定以《農藥殘留容許量標準》與主管機關公告為準。</p></div>
+  </footer>
+  <script type="module" src="js/batch.js"></script>
+</body>
+</html>

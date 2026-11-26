@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>農藥殘留容許量查詢</title>
+  <meta name="description" content="對照台灣農藥殘留容許量標準，判斷保健食品原料的檢出是否超標，並顯示適用依據。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%230f5c45' width='32' height='32' rx='8'/%3E%3Cpath fill='%23f4fff8' d='M8 22 V10 h4.2 c3.3 0 5.2 1.7 5.2 4.3 0 2.7-2 4.4-5.3 4.4 H11 V22H8zm3-5.6h1.1c1.6 0 2.5-.7 2.5-1.9s-.9-1.8-2.5-1.8H11v3.7zM19 22l4.6-12H27l-5.2 12H19z'/%3E%3C/svg%3E">
+</head>
+<body>
+  <div id="banner" class="banner"></div>
+  <header class="top">
+    <div class="wrap top-row">
+      <div>
+        <p class="eyebrow">食品藥物管理署開放資料 · 農藥殘留容許量標準</p>
+        <h1>農藥殘留容許量查詢</h1>
+        <p class="lede">給保健食品原料的品管與採購。拿到 MOHWP0055.05 篩檢報告時，查這筆檢出算不算超標，以及依據是個別標準、類別標準、註五定量極限，還是不得檢出。</p>
+      </div>
+      <nav>
+        <a href="index.html" aria-current="page">單筆查詢</a>
+        <a href="batch.html">批次報告</a>
+        <a href="history.html">更新歷程</a>
+        <a href="about.html">說明</a>
+      </nav>
+    </div>
+  </header>
+  <div class="wrap" id="alerts"></div>
+  <main class="wrap">
+    <form id="query" class="panel">
+      <div class="grid">
+        <div class="field">
+          <label for="crop">原料名稱 <span class="hint">作物或俗稱，對到多筆要自己選</span></label>
+          <input id="crop" type="text" autocomplete="off" placeholder="例如苦瓜、洛神花、小黃瓜" required>
+          <div id="crop-menu" class="menu" hidden></div>
+        </div>
+        <div class="field">
+          <label for="pest">農殘名稱 <span class="hint">中文普通名稱或英文國際普通名稱</span></label>
+          <input id="pest" type="text" autocomplete="off" placeholder="例如貝芬替或 Carbendazim" required>
+          <div id="pest-menu" class="menu" hidden></div>
+        </div>
+        <div>
+          <label for="value">檢出劑量 ppm <span class="hint">可留空。ND、未檢出、&lt;0.01 都可以</span></label>
+          <input id="value" type="text" inputmode="decimal" placeholder="0.40">
+        </div>
+      </div>
+      <div class="actions">
+        <div class="modes" role="radiogroup" aria-label="市售型態">
+          <span>市售型態</span>
+          <label><input type="radio" name="matrix" value="fresh" checked>新鮮</label>
+          <label><input type="radio" name="matrix" value="dried">乾燥</label>
+        </div>
+        <button class="primary" type="submit">查詢</button>
+        <span class="hint">第2條以市售型態計，乾燥品不另乘濃縮係數。乾燥蔬果與香辛、草本若沒有個別標準，註五改走其他(茶類)*。</span>
+      </div>
+      <div class="examples">
+        <span>範例</span>
+        <button type="button" class="chip" data-demo data-crop="苦瓜" data-pest="貝芬替" data-value="0.4">苦瓜 + 貝芬替 0.4</button>
+        <button type="button" class="chip" data-demo data-crop="番茄" data-pest="貝芬替" data-value="1.2">番茄 + 貝芬替 1.2</button>
+        <button type="button" class="chip" data-demo data-crop="西瓜" data-pest="貝芬替" data-value="2">西瓜 + 貝芬替 2</button>
+      </div>
+    </form>
+    <div id="result"></div>
+  </main>
+  <footer>
+    <div class="wrap">
+      <p>本站是對照工具。判定以主管機關公布的《農藥殘留容許量標準》為準，正式法規與食品藥物管理署公告優先於本頁。</p>
+    </div>
+  </footer>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

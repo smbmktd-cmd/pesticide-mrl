@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>說明 · 農藥殘留容許量查詢</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="banner" class="banner"></div>
+  <header class="top">
+    <div class="wrap top-row">
+      <div>
+        <p class="eyebrow">怎麼判、資料從哪來</p>
+        <h1>使用說明</h1>
+      </div>
+      <nav>
+        <a href="index.html">單筆查詢</a>
+        <a href="batch.html">批次報告</a>
+        <a href="history.html">更新歷程</a>
+        <a href="about.html" aria-current="page">說明</a>
+      </nav>
+    </div>
+  </header>
+  <div class="wrap" id="alerts"></div>
+  <main class="wrap prose">
+    <p class="callout"><strong>免責</strong>：這是對照工具，方便原料品管快速看報告。殘留是否合格，以《農藥殘留容許量標準》與食品藥物管理署公告的原文為準。本頁若與法規不一致，以法規為準。</p>
+    <h2>怎麼查</h2>
+    <ol>
+      <li>輸入原料。用附表五的作物名最好，俗稱（洛神花、地瓜、高麗菜）也會帶到正式名稱。</li>
+      <li>名稱對到一種以上，或附表五根本沒有，畫面上會列出候選。<strong>不會悄悄猜一個類別。</strong>附表五每一類都用「等」結尾，沒寫到的作物不能自行歸類。</li>
+      <li>輸入農殘的中文普通名稱或英文國際普通名稱，檢出量可留空。</li>
+      <li>新鮮或乾燥選實際進貨的市售型態。乾燥不會把限值再乘濃縮係數（第2條）。</li>
+    </ol>
+    <h2>採用順序</h2>
+    <ol>
+      <li>附表三免訂。</li>
+      <li>該作物的個別列。附表五寫「胡瓜(含小黃瓜)」，但附表一把小黃瓜和「胡瓜(小黃瓜除外)」分開，查的時候依你選的那個名字，不合併。</li>
+      <li>「其他○類(A、B除外)」：作物在該類、而且沒有被除外。同時命中多條時，採用排除名單較長的那條；限值若不同，標成無法判定。</li>
+      <li>子類整列，然後類別整列（含附表一寫成「米」「茶」的列）。</li>
+      <li>其他(蔬果類)*、其他(穀類)*、其他(茶類)*，也就是註五的定量極限。穀類與乾豆走穀類；茶走茶類；新鮮蔬果與新鮮香辛、草本走蔬果；乾燥蔬果、乾燥香辛與草木本走茶類（對應 MOHWP0055.05 的 III 類）。</li>
+      <li>附表四禁用：不得檢出。</li>
+      <li>以上都沒有：表中未列，依第3條不得檢出。</li>
+    </ol>
+    <p>每一筆結果都會寫適用依據，例如「依瓜菜類標準」「依其他果菜類(洛神葵除外)標準」「依其他(蔬果類)*，註五定量極限」。</p>
+    <h2>和篩檢報告的關係</h2>
+    <p>方法 MOHWP0055.05 一次可測約 410 項。批次頁把同一原料的名稱與檢出量貼進去，匯出的 CSV 帶有容許量、依據和判定，方便貼回品管紀錄。註二這類代謝物（免賴得、甲基多保淨比照貝芬替）會在結果裡標出來。</p>
+    <h2>資料從哪來</h2>
+    <ul>
+      <li>附表一容許量、附表二外源性、附表三免訂、附表四禁用、附表五作物分類：<a href="https://data.fda.gov.tw/">食品藥物管理署政府資料開放</a> CSV。</li>
+      <li>法規修正日與附表註：<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0040083">全國法規資料庫，農藥殘留容許量標準</a>。</li>
+      <li>筆數交叉比對：<a href="https://consumer.fda.gov.tw/Law/PesticideList.aspx?nodeID=520&amp;tk=1">食品藥物消費者專區</a>。對不上或連不上，會寫在頁首，不拿掉。</li>
+    </ul>
+    <p>開放資料有些欄位被存成問號（常見是「殺蟎劑」的蟎）。能用法規 PDF 對回原字的會還原，原始字串仍留在結果表。普通名稱空白的列仍可用英文查。重複列（例如可尼丁與竹筍）會在頁首標出來。</p>
+    <h2>更新</h2>
+    <p>GitHub Actions 每個台北時間 06:00 下載五張表，雜湊一樣仍會留下同步紀錄；內容有差才追加一筆歷程（新增、刪除、限值變更、備註變更、分類變更）。作物被改掛到別的類別時，歷程類型是分類變更。</p>
+  </main>
+  <footer>
+    <div class="wrap"><p>本站是對照工具。正式判定以《農藥殘留容許量標準》為準。</p></div>
+  </footer>
+  <script type="module">
+    import { loadJson, renderBanner } from "./js/chrome.js";
+    try {
+      renderBanner(await loadJson("data/meta.json"));
+    } catch (error) {
+      document.querySelector("#banner").textContent = "資料時間尚未載入";
+    }
+  </script>
+</body>
+</html>

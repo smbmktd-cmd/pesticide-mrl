@@ -1,0 +1,48 @@
+{
+  "synced_at": "2026-11-26T09:15:13+08:00",
+  "law_amended_on": "2026-04-21",
+  "dataset_updated_at": null,
+  "counts": {
+    "附表一": 8258,
+    "附表二": 1,
+    "附表三": 44,
+    "附表四": 67,
+    "附表五類別": 22,
+    "作物": 320,
+    "農藥": 519,
+    "容許量列": 8258,
+    "普通名稱空白": 306,
+    "缺字未修": 0
+  },
+  "warnings": [
+    "附表一／附表二有 306 列普通名稱空白，仍可用國際普通名稱查詢",
+    "附表一 Clothianidin＋竹筍 重複 2 列且限值相同，查詢採用一列",
+    "開放資料 CSV 回應沒有 Last-Modified，資料集更新時間無法從表頭取得；請以法規修正日與本次同步時間為準。",
+    "消費者專區無法交叉比對筆數（TLS 連線中斷，這次沒有讀到頁面上的筆數）"
+  ],
+  "crosscheck_mismatches": [
+    "消費者專區無法交叉比對筆數（TLS 連線中斷，這次沒有讀到頁面上的筆數）"
+  ],
+  "sources": {
+    "附表一": "https://data.fda.gov.tw/data/opendata/export/13/csv",
+    "附表二": "https://data.fda.gov.tw/data/opendata/export/173/csv",
+    "附表三": "https://data.fda.gov.tw/data/opendata/export/14/csv",
+    "附表四": "https://data.fda.gov.tw/data/opendata/export/15/csv",
+    "附表五": "https://data.fda.gov.tw/data/opendata/export/16/csv",
+    "法規": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0040083",
+    "消費者專區": "https://consumer.fda.gov.tw/Law/PesticideList.aspx?nodeID=520&tk=1"
+  },
+  "hashes": {
+    "附表一": "34e32de63acaca628d59d6f010d2c546e9439207271e15896263f37fd4f5d2f0",
+    "附表二": "725d33df0e4ec4d3fddb2737583aa45edb25b4d853f14d822a4b401c37dfffa3",
+    "附表三": "ccdc67b8a2dc53841f308ce9ab8b35957b924369df2bff331ff714bbb84ce8a5",
+    "附表四": "1687120768356df5fbc318c797739f538ec2336819e51bf790749fca9f7e10d2",
+    "附表五": "e835da91ce466cacbf217e8094fbc0dc4fa8657f6c56e2193489433d532c3f7d"
+  },
+  "consumer_counts": null,
+  "repair_stats": {
+    "aligned": 346,
+    "skipped": 62,
+    "pdf_pesticides": 405
+  }
+}

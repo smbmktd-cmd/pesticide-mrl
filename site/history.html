@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>更新歷程 · 農藥殘留容許量查詢</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="banner" class="banner"></div>
+  <header class="top">
+    <div class="wrap top-row">
+      <div>
+        <p class="eyebrow">每日 06:00（台北）比對</p>
+        <h1>更新歷程</h1>
+        <p class="lede" id="latest">只追加、不覆寫。初始快照不會把當時已存在的列全部記成新增。</p>
+      </div>
+      <nav>
+        <a href="index.html">單筆查詢</a>
+        <a href="batch.html">批次報告</a>
+        <a href="history.html" aria-current="page">更新歷程</a>
+        <a href="about.html">說明</a>
+      </nav>
+    </div>
+  </header>
+  <div class="wrap" id="alerts"></div>
+  <main class="wrap">
+    <div class="panel">
+      <div class="filters">
+        <input id="q" type="search" placeholder="搜尋農藥或作物">
+        <select id="kind">
+          <option value="">全部類型</option>
+          <option>新增</option>
+          <option>刪除</option>
+          <option>限值變更</option>
+          <option>備註變更</option>
+          <option>分類變更</option>
+        </select>
+        <span id="count" class="hint"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>日期</th><th>類型</th><th>農藥</th><th>作物／分類</th><th>欄位</th><th>來源</th></tr>
+          </thead>
+          <tbody id="events"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <div class="wrap"><p>異動鍵：正規化後的國際普通名稱 + 原始作物類別。附表五以類別 + 作物為鍵。作物改掛到別的類別時，類型是「分類變更」。</p></div>
+  </footer>
+  <script type="module" src="js/history.js"></script>
+</body>
+</html>
