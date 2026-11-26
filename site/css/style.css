@@ -43,17 +43,31 @@ code { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; 
 }
 .banner .wrap { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 10px 0; }
 .banner strong { font-weight: 700; }
-.alerts { padding: 14px 0 0; }
-.alert, .quality {
+#alerts { padding-top: 14px; }
+.notice {
   background: var(--amber-soft);
   border: 1px solid #efd7a8;
   border-radius: 12px;
-  padding: 12px 14px;
   margin-bottom: 10px;
 }
-.alert strong, .quality summary { color: var(--amber); }
-.alert ul, .quality ul { margin: 8px 0 0; padding-left: 1.2em; }
-.quality summary { cursor: pointer; font-weight: 700; }
+.notice summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--amber);
+  padding: 12px 14px;
+  list-style: none;
+}
+.notice summary::-webkit-details-marker { display: none; }
+.notice summary::before { content: "▸ "; }
+.notice[open] summary::before { content: "▾ "; }
+.notice summary:focus-visible {
+  outline: 3px solid #e2c48a;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.notice .notice-body { padding: 0 14px 12px; }
+.notice ul { margin: 0; padding-left: 1.2em; }
+.notice p { margin: 0; }
 
 .top { padding: 28px 0 8px; }
 .top-row { display: flex; justify-content: space-between; gap: 24px; align-items: flex-end; }

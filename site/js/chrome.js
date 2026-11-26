@@ -47,12 +47,21 @@ export function renderBanner(meta) {
   const mismatches = meta.crosscheck_mismatches || [];
   const warnings = (meta.warnings || []).filter((item) => !mismatches.includes(item));
   const stale = meta.site_stale
-    ? `<div class="alert"><strong>消費者專區本次無法連線</strong><p>容許量與禁用名單沿用 ${esc(formatTaipei(meta.site_fetched_at))} 的成功下載，沒有改用開放資料 CSV。</p></div>`
+    ? `<details class="notice">
+        <summary>消費者專區本次無法連線（1）</summary>
+        <div class="notice-body"><p>容許量與禁用名單沿用 ${esc(formatTaipei(meta.site_fetched_at))} 的成功下載，沒有改用開放資料 CSV。</p></div>
+      </details>`
     : "";
   host.innerHTML = `
     ${stale}
-    ${mismatches.length ? `<div class="alert"><strong>與開放資料的差異，未隱藏。查詢採用消費者專區。</strong><ul>${mismatches.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>` : ""}
-    ${warnings.length ? `<details class="quality" open><summary>資料清理與下載備註（${warnings.length}）</summary><ul>${warnings.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></details>` : ""}
+    ${mismatches.length ? `<details class="notice">
+        <summary>與開放資料的差異，未隱藏。查詢採用消費者專區。（${mismatches.length}）</summary>
+        <div class="notice-body"><ul>${mismatches.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>
+      </details>` : ""}
+    ${warnings.length ? `<details class="notice">
+        <summary>資料清理與下載備註（${warnings.length}）</summary>
+        <div class="notice-body"><ul>${warnings.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></div>
+      </details>` : ""}
   `;
 }
 
