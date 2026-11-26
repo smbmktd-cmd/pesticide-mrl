@@ -22,7 +22,9 @@ jobs:
       - name: 安裝測試套件
         run: python -m pip install -r requirements.txt
       - name: 以消費者專區重建快照
+        id: site
         if: github.event_name == 'pull_request'
+        continue-on-error: true
         run: python -m pipeline.sync --trigger gha
       - name: 查詢規則
         run: |
@@ -36,7 +38,7 @@ jobs:
           path: data/site
           if-no-files-found: ignore
       - name: 把專區快照推回拉取請求
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && steps.site.outcome == 'success'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

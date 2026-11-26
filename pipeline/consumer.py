@@ -97,7 +97,7 @@ def _curl(url: str, extra: list[str], body: bytes | None, cookie: Path, timeout:
         check=False,
     )
     if proc.returncode != 0:
-        err = proc.stderr.decode("utf-8", "replace")[-300]
+        err = proc.stderr.decode("utf-8", "replace")[-300:]
         raise RuntimeError(f"curl {proc.returncode}: {err}")
     raw = proc.stdout
     # -D - prepends headers. Split on the header/body boundary.
