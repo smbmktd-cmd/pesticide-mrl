@@ -1,5 +1,5 @@
 {
-  "synced_at": "2026-11-26T09:52:09+08:00",
+  "synced_at": "2026-11-26T09:54:27+08:00",
   "law_amended_on": "2026-04-21",
   "dataset_updated_at": null,
   "counts": {
@@ -15,8 +15,10 @@
     "缺字未修": 0
   },
   "warnings": [
+    "消費者專區本次無法連線（SSLError: HTTPSConnectionPool(host='consumer.fda.gov.tw', port=443): Max retries exceeded with url: /Law/PesticideList.aspx?nodeID=520&tk=1 (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1011)')))）。容許量與禁用名單沿用 2026-11-26T09:40:00+08:00 的成功下載，沒有改用開放資料 CSV。",
     "附表一至附表四採用消費者專區；開放資料 CSV 只作交叉比對。",
     "附表一 Clothianidin＋竹筍 重複 2 列且限值相同，查詢採用一列",
+    "開放資料 CSV 回應沒有 Last-Modified，資料集更新時間無法從表頭取得；請以法規修正日與本次同步時間為準。",
     "附表一限值不同（採用消費者專區）：亞托敏／Azoxystrobin／其他(茶類)*／0.05 ppm；開放資料為 0.05* ppm",
     "附表一開放資料缺少（已補進消費者專區）：剋安勃／Chlorantraniliprole／十字花科小葉菜／3.0 ppm",
     "附表一開放資料缺少（已補進消費者專區）：陶斯松／Chlorpyrifos／茶類／2.0 ppm",
@@ -80,7 +82,8 @@
     "附表四開放資料缺少（已補進消費者專區）：滴滴／Dichloropropene",
     "附表四開放資料多出未採用：滴滴／Dichloropropane-",
     "附表四開放資料多出未採用：／Dichloropropene",
-    "附表四開放資料多出未採用：／"
+    "附表四開放資料多出未採用：／",
+    "下載警告：附表一 PDF：TimeoutError: The read operation timed out"
   ],
   "crosscheck_mismatches": [
     "附表一限值不同（採用消費者專區）：亞托敏／Azoxystrobin／其他(茶類)*／0.05 ppm；開放資料為 0.05* ppm",
@@ -181,7 +184,7 @@
     "pdf_pesticides": 405
   },
   "primary_source": "consumer",
-  "site_stale": false,
+  "site_stale": true,
   "site_fetched_at": "2026-11-26T09:40:00+08:00",
-  "site_error": ""
+  "site_error": "SSLError: HTTPSConnectionPool(host='consumer.fda.gov.tw', port=443): Max retries exceeded with url: /Law/PesticideList.aspx?nodeID=520&tk=1 (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1011)')))"
 }
