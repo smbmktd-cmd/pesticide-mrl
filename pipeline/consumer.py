@@ -352,16 +352,72 @@ def snapshot_path(site_dir: Path, annex: str) -> Path:
     return site_dir / TABLES[annex]["file"]
 
 
+def _normalize_site_row(row: dict, kind: str) -> dict:
+    if kind == "mrl":
+        limit = row.get("容許量ppm") or row.get("容許量(ppm)") or ""
+        return {
+            "國際普通名稱": clean_ws(row.get("國際普通名稱") or ""),
+            "普通名稱": clean_ws(row.get("普通名稱") or ""),
+            "作物類別": clean_ws(row.get("作物類別") or ""),
+            "容許量ppm": clean_ws(str(limit)),
+            "備註": clean_ws(row.get("備註") or ""),
+        }
+    if kind == "exempt":
+        return {
+            "農藥名稱": clean_ws(row.get("農藥名稱") or ""),
+            "英文名稱": clean_ws(row.get("英文名稱") or ""),
+        }
+    return {
+        "農藥名稱": clean_ws(row.get("農藥名稱") or ""),
+        "英文名稱": clean_ws(row.get("英文名稱") or ""),
+        "禁止製造或輸入日期": clean_ws(
+            row.get("禁止製造或輸入日期") or row.get("禁止製造、輸入日期") or ""
+        ),
+        "禁止銷售或使用日期": clean_ws(
+            row.get("禁止銷售或使用日期") or row.get("禁止銷售、使用日期") or ""
+        ),
+    }
+
+
+def read_site_csv(path: Path, kind: str) -> list[dict]:
+    import csv
+
+    with path.open(encoding="utf-8-sig", newline="") as handle:
+        return [_normalize_site_row(row, kind) for row in csv.DictReader(handle)]
+
+
 def load_snapshot(site_dir: Path) -> dict[str, list[dict]] | None:
-    if not (site_dir / "manifest.json").exists():
+    if not (site_dir / "site_table1.csv").exists() and not (site_dir / "annex1.json").exists():
         return None
     loaded = {}
     for annex, spec in TABLES.items():
-        path = site_dir / spec["file"]
-        if not path.exists():
+        csv_path = site_dir / f"site_table{ {'附表一':'1','附表二':'2','附表三':'3','附表四':'4'}[annex] }.csv"
+        json_path = site_dir / spec["file"]
+        if csv_path.exists():
+            loaded[annex] = read_site_csv(csv_path, spec["kind"])
+        elif json_path.exists():
+            loaded[annex] = json.loads(json_path.read_text(encoding="utf-8"))
+        else:
             return None
-        loaded[annex] = json.loads(path.read_text(encoding="utf-8"))
     return loaded
+
+
+def load_annex5_rows(site_dir: Path) -> list[dict] | None:
+    path = site_dir / "site_table5.csv"
+    if not path.exists():
+        return None
+    import csv
+
+    rows = []
+    with path.open(encoding="utf-8-sig", newline="") as handle:
+        for row in csv.DictReader(handle):
+            rows.append(
+                {
+                    "類別": re.sub(r"^\d+\.\s*", "", (row.get("類別") or "").strip()),
+                    "農作物類農產品": row.get("農作物類農產品") or "",
+                }
+            )
+    return rows
 
 
 def load_manifest(site_dir: Path) -> dict | None:
@@ -383,22 +439,44 @@ def save_snapshot(site_dir: Path, tables: dict[str, list[dict]], manifest: dict)
 
 
 def fetch_all(site_dir: Path, fetched_at: str) -> tuple[dict[str, list[dict]], dict]:
-    tables: dict[str, list[dict]] = {}
-    methods = {}
-    for annex, spec in TABLES.items():
-        rows, method, stated = fetch_table(spec["tk"], spec["kind"])
-        tables[annex] = rows
-        methods[annex] = {"rows": len(rows), "stated": stated, "method": method, "tk": spec["tk"]}
-        print(f"{annex} tk={spec['tk']} {len(rows)} 列 via {method}（頁面標示 {stated}）", flush=True)
+    """Primary path: 匯出 Excel postback. Writes site_tableN.csv and keeps 附表五."""
+    import csv
+
+    from .fetch_site_mrl import download_workbooks
+
+    site_dir.mkdir(parents=True, exist_ok=True)
+    books = download_workbooks(site_dir)
+    kind_by_tk = {1: "mrl", 7: "mrl", 2: "exempt", 3: "banned"}
+    file_by_tk = {1: "site_table1.csv", 7: "site_table2.csv", 2: "site_table3.csv", 3: "site_table4.csv"}
+    for tk, path in books.items():
+        parsed = parse_xlsx(path.read_bytes(), kind_by_tk[tk])
+        with (site_dir / file_by_tk[tk]).open("w", encoding="utf-8", newline="") as handle:
+            fields = list(parsed[0].keys()) if parsed else []
+            writer = csv.DictWriter(handle, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(parsed)
+    tables = load_snapshot(site_dir)
+    if not tables or len(tables.get("附表一") or []) < 1000:
+        raise ConsumerUnavailable("匯出 Excel 沒有取得附表一")
+    methods = {
+        annex: {"rows": len(rows), "method": "excel-postback", "tk": TABLES[annex]["tk"]}
+        for annex, rows in tables.items()
+    }
     manifest = {
         "fetched_at": fetched_at,
         "ok": True,
         "stale": False,
         "error": "",
         "source": BASE,
+        "method": "匯出Excel postback __EVENTTARGET=ctl00$content$LinkButton1",
         "tables": methods,
     }
-    save_snapshot(site_dir, tables, manifest)
+    (site_dir / "manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    for annex, rows in tables.items():
+        print(f"{annex} {len(rows)} 列 via excel-postback", flush=True)
     return tables, manifest
 
 
@@ -411,8 +489,39 @@ def resolve_primary(fetched: dict | None, previous: dict | None) -> tuple[dict, 
     raise ConsumerUnavailable("消費者專區無法連線，且沒有可沿用的成功快照。拒絕改用開放資料。")
 
 
+def _limits_differ(csv_value: str, site_value: str) -> bool:
+    from decimal import Decimal, InvalidOperation
+
+    left = clean_ws(csv_value).replace("＊", "*")
+    right = clean_ws(site_value).replace("＊", "*")
+    if left.endswith("*") != right.endswith("*"):
+        return True
+    try:
+        return Decimal(left.rstrip("*") or "0") != Decimal(right.rstrip("*") or "0")
+    except InvalidOperation:
+        return left != right
+
+
+def _loose_crop(text: str) -> str:
+    import unicodedata
+
+    folded = unicodedata.normalize("NFKC", norm_label(text))
+    return folded.replace("﹙", "(").replace("﹚", ")").replace("﹝", "(").replace("﹞", ")")
+
+
+def _crop_match(csv_crop: str, site_crop: str) -> bool:
+    left = _loose_crop(csv_crop)
+    right = _loose_crop(site_crop)
+    if left == right:
+        return True
+    if "?" not in left or left.count("?") > 4:
+        return False
+    pattern = "^" + "".join("." if char == "?" else re.escape(char) for char in left) + "$"
+    return re.fullmatch(pattern, right) is not None
+
+
 def _mrl_key(row: dict) -> tuple[str, str]:
-    return (norm_en_key(row.get("國際普通名稱") or ""), norm_label(row.get("作物類別") or ""))
+    return (norm_en_key(row.get("國際普通名稱") or ""), _loose_crop(row.get("作物類別") or ""))
 
 
 def _name_key(row: dict) -> tuple[str, str]:
@@ -425,22 +534,42 @@ def crosscheck_csv(site_tables: dict[str, list[dict]], csv_tables: dict[str, lis
     for annex, spec in TABLES.items():
         site_rows = site_tables.get(annex) or []
         csv_rows = csv_tables.get(annex) or []
-        key_fn = _mrl_key if spec["kind"] == "mrl" else _name_key
+        if spec["kind"] == "mrl":
+            buckets: dict[str, list[dict]] = {}
+            for row in csv_rows:
+                buckets.setdefault(norm_en_key(row.get("國際普通名稱") or ""), []).append(row)
+            used: dict[str, set[int]] = {}
+            for row in site_rows:
+                key = norm_en_key(row.get("國際普通名稱") or "")
+                pool = buckets.get(key) or []
+                chosen = None
+                for index, other in enumerate(pool):
+                    if index in used.setdefault(key, set()):
+                        continue
+                    if _crop_match(other.get("作物類別") or "", row.get("作物類別") or ""):
+                        chosen = index
+                        break
+                if chosen is None:
+                    findings.append({"annex": annex, "diff": "開放資料缺少", "site": row, "csv": None})
+                    continue
+                used[key].add(chosen)
+                other = pool[chosen]
+                if _limits_differ(other.get("容許量ppm") or "", row.get("容許量ppm") or ""):
+                    findings.append({"annex": annex, "diff": "限值不同", "site": row, "csv": other})
+            for key, pool in buckets.items():
+                for index, other in enumerate(pool):
+                    if index not in used.get(key, set()):
+                        findings.append({"annex": annex, "diff": "開放資料多出未採用", "site": None, "csv": other})
+            continue
+        key_fn = _name_key
         csv_bag = Counter(key_fn(row) for row in csv_rows)
         site_bag = Counter(key_fn(row) for row in site_rows)
-        csv_by = {}
-        for row in csv_rows:
-            csv_by.setdefault(key_fn(row), row)
         seen = Counter()
         for row in site_rows:
             key = key_fn(row)
             seen[key] += 1
             if seen[key] > csv_bag.get(key, 0):
                 findings.append({"annex": annex, "diff": "開放資料缺少", "site": row, "csv": None})
-            elif spec["kind"] == "mrl":
-                other = csv_by.get(key)
-                if other and clean_ws(other.get("容許量ppm") or "") != clean_ws(row.get("容許量ppm") or ""):
-                    findings.append({"annex": annex, "diff": "限值不同", "site": row, "csv": other})
         seen_csv = Counter()
         for row in csv_rows:
             key = key_fn(row)

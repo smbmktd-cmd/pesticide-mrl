@@ -7,6 +7,7 @@ import hashlib
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
+from .consumer import load_annex5_rows, load_snapshot
 from .crops import CropBuilder, finalize_crops
 from .footnotes import NOTE_ON_KEY, REDIRECTS, parse_footnotes
 from .labels import CATEGORY_ALIASES, parse_label
@@ -92,7 +93,8 @@ def build_database(
             raise FileNotFoundError(f"缺少{name}：{path}")
     hashes = {name: file_sha256(path) for name, path in paths.items()}
     csv_tables = {name: read_csv(path) for name, path in paths.items()}
-    site_tables = site_tables or {}
+    if site_tables is None:
+        site_tables = load_snapshot(Path(__file__).resolve().parents[1] / "data" / "site") or {}
     if site_tables:
         warnings.append("附表一至附表四採用消費者專區；開放資料 CSV 只作交叉比對。")
     else:
@@ -101,7 +103,7 @@ def build_database(
     annex2 = site_tables.get("附表二") or csv_tables["附表二"]
     annex3 = site_tables.get("附表三") or csv_tables["附表三"]
     annex4 = site_tables.get("附表四") or csv_tables["附表四"]
-    annex5 = csv_tables["附表五"]
+    annex5 = load_annex5_rows(Path(__file__).resolve().parents[1] / "data" / "site") or csv_tables["附表五"]
 
     categories = {(row.get("類別") or "").strip() for row in annex5}
     builder = CropBuilder()
@@ -177,6 +179,50 @@ def build_database(
     for crop in crops:
         for group in crop["groups"]:
             subgroups.add(group)
+    known_names = {crop["name"] for crop in crops}
+    alias_names = {name for names in CATEGORY_ALIASES.values() for name in names}
+    for item in prepared_rows:
+        label = item["crop"]
+        if (
+            not label
+            or label in known_names
+            or label in categories
+            or label in alias_names
+            or label.startswith("其他")
+            or label.endswith("類")
+            or "(" in label
+            or "（" in label
+        ):
+            continue
+        crops.append(
+            {
+                "id": f"表列:{label}",
+                "name": label,
+                "category": "",
+                "groups": [],
+                "broads": [],
+                "aliases": [],
+                "alias_open": False,
+                "excerpt": label,
+                "separated_from": None,
+                "origin": "mrl-label",
+                "match_names": [label],
+                "exact_keys": [norm_zh_key(label)],
+                "soft": False,
+                "uncategorized": True,
+            }
+        )
+        known_names.add(label)
+        if label == "精緻橄欖油":
+            aliases.append(
+                {
+                    "alias": "精製橄欖油",
+                    "key": norm_zh_key("精製橄欖油"),
+                    "crop_ids": [f"表列:{label}"],
+                    "kind": "opendata-spelling",
+                    "note": "開放資料寫作精製橄欖油，消費者專區作精緻橄欖油",
+                }
+            )
 
     if len(categories) != 22:
         warnings.append(f"附表五類別數為 {len(categories)}，預期 22")

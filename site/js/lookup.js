@@ -10,6 +10,27 @@ const CATEGORY_ALIASES = {
 
 const GRAIN = new Set(["米類", "麥類", "雜糧類", "乾豆類"]);
 const ND = new Set(["nd", "n.d", "n.d.", "未檢出", "陰性", "nd.", "—", "-", "－", "<loq", "＜loq", "trace", "traces"]);
+const BUFFER = /於\s*(\d+)\s*年\s*(\d+)\s*月\s*(\d+)\s*日刪除，緩衝期\s*(\d+)\s*年/;
+
+function bufferInfo(note) {
+  const text = note || "";
+  if (!text.includes("刪除")) return null;
+  const info = { deleted: true, raw: text, end: null };
+  const matched = text.match(BUFFER);
+  if (!matched) return info;
+  const year = Number(matched[1]) + 1911 + Number(matched[4]);
+  const month = String(matched[2]).padStart(2, "0");
+  const day = String(matched[3]).padStart(2, "0");
+  info.end = `${year}-${month}-${day}`;
+  return info;
+}
+
+function bufferWarning(info) {
+  if (!info) return "";
+  let text = "此標準已刪除，緩衝期內適用，請確認產品製造/輸入日期";
+  if (info.end) text += `（緩衝期至 ${info.end}）`;
+  return text;
+}
 
 function clean(value) {
   return String(value ?? "").replace(/\u3000/g, " ").replace(/\s+/g, " ").trim();
@@ -393,6 +414,8 @@ export function lookup(db, query = {}) {
     history_keys: [],
     official_text: null,
     note5_group: null,
+    buffer: null,
+    buffer_warning: "",
   };
   if (!cropHit.crop) {
     result.needs = "crop";
@@ -481,6 +504,14 @@ export function lookup(db, query = {}) {
   const stars = rows.filter((row) => row.kind === "note5" && row.base === expected);
   specs = preferForm(specs, form);
   cats = preferForm(cats, form);
+  if (chosen.uncategorized) {
+    others.length = 0;
+    subs.length = 0;
+    cats = [];
+    broads.length = 0;
+    stars.length = 0;
+    trace.push("附表五未列此名稱，只比對同名個別列");
+  }
 
   let chosenRows = [];
   let step = null;
@@ -546,7 +577,12 @@ export function lookup(db, query = {}) {
     if (chosenRows.length > 1) {
       basis += `（另有相同限值：${chosenRows.slice(1).map((row) => row.crop).join("、")}）`;
     }
-    const [judgment, detail] = judge(amount, "numeric", top.limit);
+    let [judgment, detail] = judge(amount, "numeric", top.limit);
+    const info = bufferInfo(top.note);
+    const warning = bufferWarning(info);
+    if (warning) detail = `${warning} ${detail}`.trim();
+    result.buffer = info;
+    result.buffer_warning = warning;
     if (step === "note5") {
       const note = footnoteById(db, "註五");
       if (note && !result.footnotes.some((item) => item.id === "註五")) result.footnotes.push(note);

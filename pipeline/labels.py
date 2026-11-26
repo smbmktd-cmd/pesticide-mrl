@@ -6,7 +6,7 @@ import re
 
 from .normalize import norm_label
 
-NOTE5 = re.compile(r"^其他\((蔬果類|穀類|茶類)\)\*$")
+NOTE5 = re.compile(r"^其他\((蔬果類|穀類|茶類)\)\*?$")
 EXCLUSION = re.compile(r"\(([^()]+)除外\)$")
 FORM = re.compile(r"\((乾|乾燥|鮮)\)$")
 INCLUDES = re.compile(r"\((含|包括|包含)([^()]+)\)$")

@@ -90,8 +90,10 @@ function render(found) {
       <div class="seal ${klass}"><b>${esc(found.judgment || "—")}</b><span>${esc(found.judgment_detail || "")}</span></div>
       <div>
         <p class="basis"><span class="k">適用依據</span>${esc(found.basis)}</p>
+        ${found.buffer_warning ? `<p class="callout">${esc(found.buffer_warning)}<br>備註：${esc(found.rows?.[0]?.note || found.buffer?.raw || "")}</p>` : ""}
         <p class="meta-line">容許量 <strong>${found.limit_raw ? esc(found.limit_raw) + " ppm" : "—"}</strong>
           ${found.star ? "（* 為註五定量極限）" : ""}
+          ${found.rows?.[0]?.note ? `／ 備註 ${esc(found.rows[0].note)}` : ""}
           ／ 檢出 ${esc(valueInput.value || "未填")}
           ／ ${formValue() === "dried" ? "乾燥" : "新鮮"}市售型態</p>
         ${found.via_note ? `<p>${esc(found.via_note)}</p>` : ""}

@@ -31,8 +31,11 @@ def _crop(db, name):
 
 def test_annex5_categories(db):
     assert db["meta"]["counts"]["附表五類別"] == 22
-    assert db["meta"]["counts"]["附表一"] >= 8258
-    assert db["meta"]["counts"]["附表四"] <= 67
+    assert db["meta"]["counts"]["附表一"] == 8274
+    assert db["meta"]["counts"]["附表二"] == 1
+    assert db["meta"]["counts"]["附表三"] == 44
+    assert db["meta"]["counts"]["附表四"] == 65
+    assert any(crop["name"] == "金線蓮" for crop in db["crops"])
     assert _crop(db, "苦瓜")[0]["category"] == "瓜菜類"
     assert _crop(db, "番茄")[0]["category"] == "果菜類"
     assert _crop(db, "西瓜")[0]["category"] == "瓜果類"
@@ -137,6 +140,27 @@ def test_exempt_banned_unlisted_and_note5(db):
     assert redirect["limit"] == "0.5"
     assert redirect["basis"] == "依瓜菜類標準"
     assert "註二" in (redirect["via_note"] or "")
+
+
+def test_deleted_standards_keep_buffer_warning(db):
+    tea = lookup(db, crop="茶葉", pesticide="陶斯松", value="1")
+    assert tea["limit"] == "2"
+    assert tea["basis"] == "依茶類標準"
+    assert "已刪除" in tea["buffer_warning"]
+    assert tea["buffer"]["end"] == "2027-04-01"
+    assert "113年4月1日刪除" in tea["rows"][0]["note"]
+    hop = lookup(db, crop="啤酒花", pesticide="甲基益發靈", value="1")
+    assert hop["limit"] == "30"
+    assert hop["buffer"]["end"] == "2029-04-21"
+    berry = lookup(db, crop="草莓", pesticide="Tolylfluanid", value="3")
+    assert berry["limit"] == "3"
+    assert berry["buffer"]["end"] == "2027-04-21"
+    wasabi = lookup(db, crop="山葵", pesticide="曼普胺")
+    assert wasabi["limit"] == "0.2"
+    azoxy = next(item for item in db["pesticides"] if item["en_key"] == "azoxystrobin")
+    tea_star = next(row for row in azoxy["rows"] if row["crop"] == "其他(茶類)*")
+    assert tea_star["limit_raw"] == "0.05"
+    assert tea_star["star"] is False
 
 
 def test_encoding_repair_keeps_raw(db):

@@ -13,10 +13,38 @@
 
 from __future__ import annotations
 
+import re
 from decimal import Decimal, InvalidOperation
 
 from .labels import CATEGORY_ALIASES, note5_base
 from .normalize import norm_en_key, norm_zh_key
+
+_BUFFER = re.compile(r"於\s*(\d+)\s*年\s*(\d+)\s*月\s*(\d+)\s*日刪除，緩衝期\s*(\d+)\s*年")
+
+
+def buffer_info(note: str | None) -> dict | None:
+    """Parse 已刪除＋緩衝期 only when the note states the date and the length."""
+    text = note or ""
+    if "刪除" not in text:
+        return None
+    info = {"deleted": True, "raw": text, "end": None}
+    matched = _BUFFER.search(text)
+    if not matched:
+        return info
+    year = int(matched.group(1)) + 1911 + int(matched.group(4))
+    month = int(matched.group(2))
+    day = int(matched.group(3))
+    info["end"] = f"{year:04d}-{month:02d}-{day:02d}"
+    return info
+
+
+def buffer_warning(info: dict | None) -> str:
+    if not info:
+        return ""
+    text = "此標準已刪除，緩衝期內適用，請確認產品製造/輸入日期"
+    if info.get("end"):
+        text += f"（緩衝期至 {info['end']}）"
+    return text
 
 ND_TOKENS = {
     "nd",
@@ -403,6 +431,8 @@ def lookup(
         "history_keys": [],
         "official_text": None,
         "note5_group": None,
+        "buffer": None,
+        "buffer_warning": "",
     }
     if crop_hit.get("crop") is None:
         result["needs"] = "crop"
@@ -510,6 +540,9 @@ def lookup(
 
     specs = _prefer_form(specs, form)
     cats = _prefer_form(cats, form)
+    if chosen.get("uncategorized"):
+        others, subs, cats, broads, stars = [], [], [], [], []
+        trace.append("附表五未列此名稱，只比對同名個別列")
 
     chosen_rows: list[dict] = []
     step = None
@@ -576,6 +609,12 @@ def lookup(
             for note in db.get("footnotes") or []:
                 if note["id"] == "註五" and note not in result["footnotes"]:
                     result["footnotes"].append(note)
+        info = buffer_info(top.get("note"))
+        warning = buffer_warning(info)
+        if warning:
+            detail = f"{warning} {detail}".strip()
+        result["buffer"] = info
+        result["buffer_warning"] = warning
         result.update(
             {
                 "ok": True,

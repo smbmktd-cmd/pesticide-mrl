@@ -65,13 +65,15 @@ function run(entries) {
       if (judgment === "合格" || judgment === "未檢出" || judgment === "免訂") counts.合格 += 1;
       else if (judgment === "超標") counts.超標 += 1;
       else counts.其他 += 1;
+      const note = found.rows?.[0]?.note || "";
+      const warn = found.buffer_warning ? `<br><span class="tag warn">${esc(found.buffer_warning)}</span>` : "";
       return `<tr>
         <td>${esc(entry.name)}</td>
         <td>${esc(found.pesticide?.zh || "")}</td>
         <td>${esc(found.pesticide?.en || "")}</td>
         <td>${esc(entry.value)}</td>
-        <td>${esc(found.limit_raw || "—")}</td>
-        <td><span class="tag ${judgmentClass(judgment)}">${esc(judgment)}</span></td>
+        <td>${esc(found.limit_raw || "—")}${note ? `<br>${esc(note)}` : ""}</td>
+        <td><span class="tag ${judgmentClass(found.buffer_warning && judgment !== "超標" ? "待確認" : judgment)}">${esc(judgment)}</span>${warn}</td>
         <td>${esc(found.basis || "")}</td>
       </tr>`;
     })

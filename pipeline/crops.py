@@ -31,6 +31,8 @@ COMMON_ALIASES: dict[str, list[str]] = {
     "紅棗": ["棗"],
     "柿": ["柿子"],
     "茶": ["茶葉"],
+    # 開放資料把美洲胡桃誤作美洲湖桃。
+    "美洲湖桃": ["美洲胡桃"],
 }
 
 # 附表五用字和附表一列名不同、但指同一作物。
@@ -75,6 +77,15 @@ def _strip_outer_etc(text: str) -> tuple[str, bool]:
         open_ended = True
         body = body[:-1].strip()
     return body, open_ended
+
+
+def _split_named_sections(text: str) -> list[str] | None:
+    """ODT 附表五用「香辛植物(種子)：」分段，沒有 (1)(2)(3)(4)。"""
+    pattern = r"(?=(?:香辛植物\([^)]*\)|草木本植物)\s*[：:])"
+    if not re.search(pattern, text):
+        return None
+    parts = [part.strip(" 。") for part in re.split(pattern, text) if part.strip(" 。")]
+    return parts or None
 
 
 def _strip_item_etc(item: str) -> str:
@@ -132,16 +143,21 @@ class CropBuilder:
 
     def parse_table(self, rows: list[dict]) -> None:
         for row in rows:
-            category = (row.get("類別") or "").strip()
+            category = re.sub(r"^\d+\.\s*", "", (row.get("類別") or "").strip())
             body = row.get("農作物類農產品") or ""
             text, open_ended = _strip_outer_etc(body)
             if open_ended:
                 self.open_categories.append(category)
             else:
                 self.closed_categories.append(category)
-            if re.search(r"\(\d+\)", text):
+            numbered = re.search(r"\(\d+\)", text)
+            named = _split_named_sections(text)
+            if numbered:
                 chunks = [chunk.strip() for chunk in re.split(r"\(\d+\)", text) if chunk.strip()]
                 for chunk in chunks:
+                    self._parse_section(chunk, category, [category])
+            elif named:
+                for chunk in named:
                     self._parse_section(chunk, category, [category])
             else:
                 self._parse_list(text, category, [category])

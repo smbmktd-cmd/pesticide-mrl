@@ -193,6 +193,9 @@ def run_sync(*, offline: bool = False, trigger: str = "manual") -> dict:
     )
     if offline and old and (old.get("meta") or {}).get("law_amended_on"):
         report["law_amended_on"] = old["meta"]["law_amended_on"]
+        report["mismatches"] = [
+            item for item in report.get("mismatches") or [] if "法規" not in item
+        ]
 
     csv_findings = []
     if site_tables:
